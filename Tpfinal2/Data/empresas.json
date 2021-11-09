@@ -1,0 +1,22 @@
+[
+    {
+        "name": "pepsi",
+        "descripcion": "empresa de gaseosas"
+    },
+    {
+        "name": "coca cola",
+        "descripcion": "empresa de gaseosas"
+    },
+    {
+        "name": "intel",
+        "descripcion": "semiconductores"
+    },
+    {
+        "name": "manaos",
+        "descripcion": "gaseosas"
+    },
+    {
+        "name": "sony",
+        "descripcion": "tecnol\u00f3gica"
+    }
+]
