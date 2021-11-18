@@ -9,5 +9,6 @@
         function Add(Student $student);
         function GetAll();
         function BuscarEmail($email);
+
     }
 ?>

@@ -91,6 +91,44 @@
             }
         }
 
+        public function BuscarXid($idstudent)
+        { 
+            try
+            {
+                $student = new Student();
+
+                $query = "SELECT * FROM $this->tableName WHERE studentId = :studentId";
+
+                $parameters['studentId'] = $idstudent; 
+
+                $this->connection = Connection::GetInstance();
+
+                $resultSet = $this->connection->Execute($query , $parameters);
+                
+                foreach ($resultSet as $row)
+                {                
+                    $student = new Student();
+                    $student->setStudentId($row["studentId"]);
+                    $student->setCareerid($row["careerId"]);
+                    $student->setFirstName($row["firstName"]);
+                    $student->setLastName($row["lastName"]);
+                    $student->setDni($row["dni"]);
+                    $student->setFilenumber($row["fileNumber"]);
+                    $student->setGender($row["gender"]);
+                    $student->setBirthdate($row["birthdate"]);
+                    $student->setEmail($row["email"]);
+                    $student->setPhone($row["phone"]);
+                    $student->setActive($row["active"]);
+
+                }
+                return $student;
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
+        }
+
         public function BuscarEmail($email)
         {
             

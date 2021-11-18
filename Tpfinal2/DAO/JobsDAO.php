@@ -19,8 +19,8 @@
         {
             try
             {
-                $query = "INSERT INTO ".$this->tableName." ( idJobposition, idEmpresa, inicio , finalizacion, horas, description, requisitos, active ) 
-                                                            VALUES ( :idJobposition, :idEmpresa, :inicio, :finalizacion, :horas, :description, :requisitos, :active);";
+                $query = "INSERT INTO ".$this->tableName." ( idJobposition, idEmpresa, inicio , finalizacion, horas, description, requisitos, maxpostulantes, active ) 
+                                                            VALUES ( :idJobposition, :idEmpresa, :inicio, :finalizacion, :horas, :description, :requisitos, :maxpostulantes, :active);";
                 
                 $parameters["idJobposition"] = $jobOffer->getIdJobPosition();
                 $parameters["idEmpresa"] = $jobOffer->getIdEmpresa();
@@ -29,6 +29,7 @@
                 $parameters["horas"] = $jobOffer->getHoras();
                 $parameters["description"] = $jobOffer->getDescription();
                 $parameters["requisitos"] = $jobOffer->getRequisitos();
+                $parameters["maxpostulantes"] = $jobOffer->getMaxPostulantes();
                 $parameters["active"] = $jobOffer->getActive();
 
                 $this->connection = Connection::GetInstance();
@@ -107,6 +108,7 @@
                     $jobOffer->setHoras($row["horas"]);
                     $jobOffer->setDescription($row["description"]);
                     $jobOffer->setRequisitos($row["requisitos"]);
+                    $jobOffer->setMaxPostulantes($row["maxpostulantes"]);
                     $jobOffer->setActive($row["active"]);
                     
                     array_push($jobList, $jobOffer);
@@ -202,13 +204,13 @@
             }
         }
 
-        function Modificar( $idjoboffer, $idEmpresa, $idJobPosition, $inicio, $finalizacion, $description, $horas, $requisitos)
+        function Modificar( $idjoboffer, $idEmpresa, $idJobPosition, $inicio, $finalizacion, $description, $horas, $requisitos, $maxPostulantes)
         {
             try
             {
                 $jobOffer = new JobOffer();
                 
-                $query = "UPDATE joboffer SET idJobposition = :idJobposition, idEmpresa = :idEmpresa, inicio = :inicio, finalizacion = :finalizacion, horas = :horas, description = :description, requisitos = :requisitos  WHERE idjobOffer = $idjoboffer ";
+                $query = "UPDATE joboffer SET idJobposition = :idJobposition, idEmpresa = :idEmpresa, inicio = :inicio, finalizacion = :finalizacion, horas = :horas, description = :description, maxpostulantes = :maxpostulantes, requisitos = :requisitos  WHERE idjobOffer = $idjoboffer ";
                 
                 $parameters['idJobposition'] = $idJobPosition;
                 $parameters['idEmpresa'] = $idEmpresa;
@@ -217,6 +219,7 @@
                 $parameters['horas'] = $horas;
                 $parameters['description']= $description;
                 $parameters['requisitos'] = $requisitos;
+                $parameters['maxpostulantes'] = $maxPostulantes;
                 
                 $this->connection = Connection::GetInstance();
 
@@ -227,6 +230,28 @@
             {
                 throw $ex;
             }
+
+
+        }
+
+        public function Baja($idJobOffer)
+        {
+            try
+            {
+                $query = "UPDATE joboffer SET  active = :active  WHERE idjobOffer = $idJobOffer ";
+                
+                $parameters['active'] = 0;
+                 
+                $this->connection = Connection::GetInstance();
+
+                $resultSet = $this->connection->Execute($query , $parameters);
+
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
+
         }
     }
 ?>

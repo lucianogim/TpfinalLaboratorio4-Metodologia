@@ -7,8 +7,9 @@
     use Models\Career as Career;
     use Models\JobOffer as JobOffer;
     use Models\Empresa as Empresa;
-    use Models\Postulantes as Postulantes;
     use Controllers\EmpresaController as EmpresaController;
+    use Controllers\PostulanteController as PostulanteController;
+    use Models\Postulantes as Postulantes;
 
     class JobsController{
 
@@ -63,8 +64,22 @@
             $this->ShowAddView($empresaList , $jobList);
 
         }
+        
+        public function FormAddViewCompany($alert="")
+        {   
+            try{
+                 $jobList = $this->jobsDAO->GetAllJobPosition();
+            }
+           catch(Exception $ex){
+               $alert = $ex->getMessage();
+           }
+           finally{
+               require_once(VIEWS_PATH."job-add-company.php");
+           }
 
-        public function Add($idEmpresa , $idJobPosition , $inicio , $finalizacion, $description, $horas, $requisitos)
+        }
+
+        public function Add($idEmpresa , $idJobPosition , $inicio , $finalizacion, $description, $horas, $requisitos, $maxPostulantes)
         {
             try{
                 $jobOffer = new JobOffer();
@@ -76,6 +91,7 @@
                 $jobOffer->setHoras($horas);
                 $jobOffer->setDescription($description);
                 $jobOffer->setRequisitos($requisitos);
+                $jobOffer->setMaxPostulantes($maxPostulantes);
                 $jobOffer->setActive(1);
                     
                 $this->jobsDAO->Add($jobOffer);
@@ -93,29 +109,48 @@
 
         public function ShowModView($idJobOffer)
         {
-            $empresaController = new EmpresaController();
-            $empresaList = $empresaController->getAllempresas();
-            $jobsOfferList = $this->jobsDAO->GetAll();
-            $jobList = $this->jobsDAO->GetAllJobPosition();
+            try{
+                $empresaController = new EmpresaController();
+                $empresaList = $empresaController->getAllempresas();
+                $jobsOfferList = $this->jobsDAO->GetAll();
+                $jobList = $this->jobsDAO->GetAllJobPosition();
 
-            $jobOfferOriginal = new JobOffer();
-        
-            foreach ($jobsOfferList as $clave => $valor)
-            {
-                if($valor->getJobOfferId() == $idJobOffer )
-                {
-                    $jobOfferOriginal = $valor;
-                }
-
-            }   
+                $jobOfferOriginal = new JobOffer();
             
+                foreach ($jobsOfferList as $clave => $valor)
+                {
+                    if($valor->getJobOfferId() == $idJobOffer )
+                    {
+                        $jobOfferOriginal = $valor;
+                    }
+
+                }  
+            }
+            catch(Exception $ex){
+                $alert = $ex->getMessage();
+            }
+               
             require_once(VIEWS_PATH."job-mod.php");
         }
 
-        public function Modificar($idjoboffer, $idEmpresa , $idJobPosition , $inicio , $finalizacion, $description, $horas, $requisitos)
+        public function AddStudent()
         {
             try{
-                $this->jobsDAO->Modificar( $idjoboffer, $idEmpresa, $idJobPosition, $inicio, $finalizacion, $description, $horas, $requisitos);
+                $careerList = $this->jobsDAO->GetAllCareer();
+                
+            }
+            catch(Exception $ex)
+            {
+                $alert = $ex->getMessage();
+            }
+            
+            require_once(VIEWS_PATH."student-add.php");
+        }
+
+        public function Modificar($idjoboffer, $idEmpresa , $idJobPosition , $inicio , $finalizacion, $description, $horas, $requisitos, $maxPostulantes)
+        {
+            try{
+                $this->jobsDAO->Modificar( $idjoboffer, $idEmpresa, $idJobPosition, $inicio, $finalizacion, $description, $horas, $requisitos, $maxPostulantes);
                 $alert = "Modificacion exitosa";
             }
             catch(Exception $ex)
@@ -149,7 +184,6 @@
 
         public function Busqueda($busqueda)
         {
-            $jobsOfferList = $this->jobsDAO->GetAll();
             $empresaController = new EmpresaController();
             $jobsOfferList = $this->jobsDAO->GetAll();
             $jobsList = $this->jobsDAO->GetAllJobPosition();
@@ -181,6 +215,64 @@
             
             require_once(VIEWS_PATH."job-list-filt.php");
         }
+
+        public function Finalizar($idJobOffer)
+        {
+            $alert="";
+            $postulantes = new PostulanteController();
+            try
+            {
+                $emailList = array();
+                $this->jobsDAO->Baja($idJobOffer);
+                $postulantes->Baja($idJobOffer);
+                $emailList = $postulantes->emailPostulantes($idJobOffer);
+                //array_push($emailList , "lucho_gimenez98@hotmail.com.ar");
+
+                //var_dump($emailList);
+                foreach($emailList as $email)
+                {   
+                    
+                    $destinatario = $email; 
+                    $asunto = "Este mensaje es de prueba"; 
+                    $cuerpo = ' 
+                    <html> 
+                    <head> 
+                    <title>Prueba de correo</title> 
+                    </head> 
+                    <body> 
+                    <h1>Hola amigos!</h1> 
+                    <p> 
+                    <b>Bienvenidos a mi correo electrónico de prueba</b>. Gracias por participar de la prueba del sistema la oferta laboral ah finalizado. 
+                    </p> 
+                    </body> 
+                    </html> 
+                    '; 
+
+                    $headers = "From:lucianogimeneztpfinal@gmail.com \r\n";
+                    $headers .= "Cc:lucianogimeneztpfinal@gmail.com \r\n";
+                    //para el envío en formato HTML 
+                    $headers .= "MIME-Version: 1.0\r\n"; 
+                    $headers .= "Content-type: text/html \r\n"; 
+
+
+                    $mail = mail($destinatario,$asunto,$cuerpo,$headers); 
+
+                }
+
+                $alert="Baja exitosa";
+                
+            }
+            catch(Exception $ex)
+            {
+                $alert = $ex->getMessage();
+            }
+            finally
+            {
+                $this->ShowListView($alert);
+            }
+
+        }
+        
 
         public function CargaJobsCarrers()
         {

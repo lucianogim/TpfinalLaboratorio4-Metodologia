@@ -4,25 +4,26 @@
     use \FFI\Exception as Exception;
     use DAO\Connection as Connection;
     use DAO\IPostulanteDAO as IPostulanteDAO;
-    use Models\Postulante as Postulante;
+use Models\Career;
+use Models\Postulante as Postulante;
 
     class PostulanteDAO implements IPostulanteDAO
     {   
         private $connection;
-        private $tableName = "postulantes";
+        private $tableName = "postulante";
         //private $empresaList = array();
 
         public function Add(Postulante $postulante)
         {
             try
             {
-                $query = "INSERT INTO ".$this->tableName." ( idJobOffer, idStudent, active ) 
-                                                            VALUES ( :idJobOffer, :idStudent, :active);";
+                $query = "INSERT INTO ".$this->tableName." ( idjoboffer, idstudent, rutacv, active ) 
+                                                            VALUES ( :idjoboffer, :idstudent, :rutacv, :active);";
                 
-                //$parameters["studentId"] = $student->getStudentId();
-                $parameters["idJobOffer"] = $postulante->getIdJobOffer();
-                $parameters["idStudent"] = $postulante->getIdStudent();
-                $parameters["active"] = 1;
+                $parameters["idjoboffer"] = $postulante->getIdJobOffer();
+                $parameters["idstudent"] = $postulante->getIdStudent();
+                $parameters["rutacv"] = $postulante->getCv();
+                $parameters["active"] = $postulante->getActive();
                 
                 $this->connection = Connection::GetInstance();
 
@@ -49,8 +50,9 @@
                 foreach ($resultSet as $row)
                 {                
                     $postulante = new Postulante();
-                    $postulante->setIdJobOffer($row["idJobOffer"]);
-                    $postulante->setIdStudent($row["idStudent"]);
+                    $postulante->setIdJobOffer($row["idjoboffer"]);
+                    $postulante->setIdStudent($row["idstudent"]);
+                    $postulante->setCv($row["rutacv"]);
                     $postulante->setActive($row["active"]);
                     
                     array_push($postulanteList, $postulante);
@@ -139,6 +141,165 @@
                 throw $ex;
             }
         }
+
+        public function ContarId($idjoboffer)
+        {
+            try
+            {
+                $count = 0;
+                $query = "SELECT COUNT(idjoboffer) FROM postulante WHERE idjoboffer = :idjoboffer AND active = 1";
+
+                $parameters['idjoboffer'] = $idjoboffer;
+
+                $this->connection = Connection::GetInstance();
+
+                $resultSet = $this->connection->Execute($query , $parameters);
+
+                $res = current($resultSet);
+
+                $count = $res["COUNT(idjoboffer)"];
+
+                return $count;
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
+        }
+
+
+        public function BuscarMaxPostulantes($idjoboffer)
+        {
+            try{
+                $postulantes = 0;
+                $query = "SELECT maxpostulantes FROM joboffer WHERE idJobOffer = :idjoboffer";
+
+                $parameters['idjoboffer'] = $idjoboffer;
+
+                $this->connection = Connection::GetInstance();
+
+                $resultSet = $this->connection->Execute($query , $parameters);
+
+                $res = current($resultSet);
+
+                $postulantes = $res["maxpostulantes"];
+
+                return $postulantes;
+
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
+            
+        }
+
+        public function BuscarXid($idjoboffer)
+        { 
+            try
+            {
+                $postulanteList = array();
+
+                $query = "SELECT * FROM $this->tableName WHERE idjoboffer = :idjoboffer";
+
+                $parameters['idjoboffer'] = $idjoboffer; 
+
+                $this->connection = Connection::GetInstance();
+
+                $resultSet = $this->connection->Execute($query , $parameters);
+                
+                foreach ($resultSet as $row)
+                {                
+                    $postulante = new Postulante();
+                    $postulante->setIdJobOffer($row["idjoboffer"]);
+                    $postulante->setIdStudent($row["idstudent"]);
+                    $postulante->setCv($row["rutacv"]);
+                    $postulante->setActive($row["active"]);
+                    
+                    array_push($postulanteList, $postulante);
+                }
+
+                return $postulanteList;
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
+        }
+
+        public function Historial($idstudent)
+        {
+            try
+            {
+                $postulanteList = array();
+
+                $query = "SELECT * FROM $this->tableName WHERE idstudent = :idstudent";
+
+                $parameters['idstudent'] = $idstudent; 
+
+                $this->connection = Connection::GetInstance();
+
+                $resultSet = $this->connection->Execute($query , $parameters);
+                
+                foreach ($resultSet as $row)
+                {                
+                    $postulante = new Postulante();
+                    $postulante->setIdJobOffer($row["idjoboffer"]);
+                    $postulante->setIdStudent($row["idstudent"]);
+                    $postulante->setCv($row["rutacv"]);
+                    $postulante->setActive($row["active"]);
+                    
+                    array_push($postulanteList, $postulante);
+                }
+
+                return $postulanteList;
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
+        }
+
+        public function Baja($idJobOffer)
+        {
+            try
+            {
+                $query = "UPDATE $this->tableName SET  active = :active  WHERE idjobOffer = $idJobOffer ";
+                
+                $parameters['active'] = 0;
+                 
+                $this->connection = Connection::GetInstance();
+
+                $resultSet = $this->connection->Execute($query , $parameters);
+
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
+
+        }
+
+        public function BajaPostulante($idstudent)
+        {
+            try
+            {
+                $query = "UPDATE $this->tableName SET  active = :active  WHERE idstudent = $idstudent ";
+                
+                $parameters['active'] = 0;
+                 
+                $this->connection = Connection::GetInstance();
+
+                $resultSet = $this->connection->Execute($query , $parameters);
+
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
+
+        }
+
 
     }
 ?>

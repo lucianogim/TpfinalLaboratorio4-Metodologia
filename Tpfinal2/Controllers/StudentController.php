@@ -26,7 +26,7 @@ use Models\Student as Student;
             require_once(VIEWS_PATH."student-list.php");
         }
 
-        public function ShowInicioView()
+        public function ShowInicioView($alert="")
         {
             require_once(VIEWS_PATH."inicio.php");
         }
@@ -104,11 +104,10 @@ use Models\Student as Student;
             $this->Index();
         }
 
-        public function Add($studentId, $careerId, $firstName, $lastName, $dni, $fileNumber, $gender, $birthDate, $email, $phoneNumber, $active)
+        public function Add( $careerId, $firstName, $lastName, $dni, $fileNumber, $gender, $birthDate, $email, $phoneNumber)
         {
             $student = new Student();
            
-            $student->setStudentId($studentId);
             $student->setCareerid($careerId);
             $student->setFirstName($firstName);
             $student->setLastName($lastName);
@@ -118,11 +117,26 @@ use Models\Student as Student;
             $student->setBirthdate($birthDate);
             $student->setEmail($email);
             $student->setPhone($phoneNumber);
-            $student->setActive($active);
+            $student->setActive(1);
 
             $this->studentDAO->Add($student);
 
             $this->ShowAddView();
+        }
+
+        public function BuscarXid($idstudent)
+        {
+            try{
+                $student = new Student();
+
+                $student = $this->studentDAO->BuscarXid($idstudent);
+                
+                return $student;
+            }
+            catch(Exception $ex)
+            {
+                throw $ex;
+            }
         }
 
         public function Login($email="")

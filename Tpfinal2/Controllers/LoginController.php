@@ -5,21 +5,29 @@ namespace Controllers;
     use Controllers\EmpresaController as EmpresaController;
     use Controllers\StudentController as StudentController;
     use Models\Student as Student;
+    use DAO\LoginDAO as LoginDAO;
 
     class LoginController
     {
         private $empresaDAO;
         private $studentDAO;
+        private $loginDAO;
 
         public function __construct()
         {
             $this->empresaDAO = new EmpresaController();
             $this->studentDAO = new StudentController();
+            $this->loginDAO = new LoginDAO();
         }
         
         public function Index($message = "")
         {
             require_once(VIEWS_PATH."login.php");
+        }
+        
+        public function ShowInicioCompany($alert="")
+        {
+            require_once(VIEWS_PATH."inicio-company.php");
         }
 
         public function Login($email="")
@@ -28,6 +36,7 @@ namespace Controllers;
 
             $loggedUser = NULL;
             $loggedAdmin = NULL;
+            $loggedCompany = NULL;
 
             $ch = curl_init();
 
@@ -74,19 +83,31 @@ namespace Controllers;
                     $loggedUser = $student;
                 }
             }
-
-            if($email == "admin@admin"){
-
-                $loggedAdmin = 1;
+            $adminList = $this->loginDAO->EmailAdmin();
+            
+            foreach ( $adminList as $emailadmin )
+            {       
+                if( $email == $emailadmin )
+                {
+                    $loggedAdmin = 1;
+                }
             }
+
+            $Company = $this->loginDAO->BuscarEmail($email);
+            if($email == $Company->getEmail()){
+                $loggedCompany = 1;
+            }
+
             if($loggedAdmin != 0 )
             {   
                 $_SESSION["loggedAdmin"] = $loggedAdmin;
-                //session_start();
-                //header('Empresa/ShowListView');
                 $this->empresaDAO->ShowListView();
             }
-            elseif($loggedUser != NULL )
+            elseif( $loggedCompany != 0 ){
+                $_SESSION['loggedCompany'] = $Company;
+                $this->ShowInicioCompany();
+            }
+            elseif($loggedUser != NULL && $loggedUser->getActive() != 0 )
                 {   
                     //session_start();
                     $_SESSION['loggedUser'] = $loggedUser;
@@ -98,11 +119,9 @@ namespace Controllers;
                     echo "<script> if(confirm('Verifique que los datos ingresados sean correctos'));";
                     echo "window.location = '../index.php';
                         </script>";
-                }
-            
+                }  
         }
-
+        
     }
-
 
 ?>
