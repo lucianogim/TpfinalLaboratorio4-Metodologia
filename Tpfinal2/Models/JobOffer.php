@@ -11,6 +11,7 @@
         private $horas;
         private $description;
         private $requisitos;
+        private $maxPostulantes;
         private $active;
 
         public function setIdJobOffer($idJobOffer)
@@ -92,6 +93,16 @@
             return $this->requisitos;
         }
 
+        public function setMaxPostulantes($maxPostulantes)
+        {
+            $this->maxPostulantes = $maxPostulantes;
+        }
+
+        public function getMaxPostulantes()
+        {
+            return $this->maxPostulantes;
+        }
+        
         public function setActive($active)
         {
             $this->active = $active;

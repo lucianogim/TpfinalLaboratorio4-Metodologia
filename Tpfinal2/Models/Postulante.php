@@ -5,6 +5,7 @@
     {
         private $idJobOffer;
         private $idStudent;
+        private $cv;
         private $active;
         
         public function setIdJobOffer($idJobOffer)
@@ -25,6 +26,16 @@
         public function getIdStudent()
         {
             return $this->idStudent;
+        }
+
+        public function getCv()
+        {
+            return $this->cv;
+        }
+
+        public function setCv($cv)
+        {
+            $this->cv = $cv;
         }
 
         public function setActive($active)
